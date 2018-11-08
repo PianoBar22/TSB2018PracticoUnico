@@ -12,11 +12,11 @@ public class TSB_OAHashTableTest {
     @Before
     public void setUp(){
         tsb_oaHashtable = new TSB_OAHashtable<>();
-/*
+
         tsb_oaHashtable.put("Palabra1", new Contador());
         tsb_oaHashtable.put("Palabra2", new Contador());
         tsb_oaHashtable.put("Palabra3", new Contador(4));
-        tsb_oaHashtable.put("Palabra4", new Contador(5));*/
+        tsb_oaHashtable.put("Palabra4", new Contador(5));
     }
 
     @Test

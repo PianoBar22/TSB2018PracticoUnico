@@ -181,11 +181,16 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
             }
             else
             {
+                if(this.averageLength() >= this.load_factor * 10) this.rehash();
                 table[hash] = new Entry<>(key, value);
                 this.count++;
             }
 
         return old;
+    }
+
+    private int averageLength() {
+        return this.count / this.table.length;
     }
 
     @Override
@@ -200,7 +205,15 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
 
     @Override
     public void clear() {
+        this.table = new Map.Entry[this.initial_capacity];
 
+        for(int i = 0; i < this.table.length; i++)
+        {
+            this.table[i] = null;
+        }
+
+        this.count = 0;
+        this.modCount++;
     }
 
     @Override
@@ -257,6 +270,51 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
             return -1;
         else
             return hash;
+    }
+
+    protected void rehash()
+    {
+        int old_length = this.table.length;
+
+        // nuevo tamaño: doble del anterior, más uno para llevarlo a impar...
+        int new_length = old_length * 2 + 1;
+
+        // no permitir que la tabla tenga un tamaño mayor al límite máximo...
+        // ... para evitar overflow y/o desborde de índices...
+        if(new_length > TSB_OAHashtable.MAX_SIZE)
+        {
+            new_length = TSB_OAHashtable.MAX_SIZE;
+        }
+
+        // crear el nuevo arreglo con new_length listas vacías...
+        Map.Entry<K, V> temp[] = new Map.Entry[new_length];
+        for(int j = 0; j < temp.length; j++) { temp[j] = null; }
+
+        // notificación fail-fast iterator... la tabla cambió su estructura...
+        this.modCount++;
+
+        // recorrer el viejo arreglo y redistribuir los objetos que tenia...
+        Iterator<Map.Entry<K, V>> it = this.entrySet().iterator();
+
+        while(it.hasNext())
+        {
+            // obtener un objeto de la vieja lista...
+            Map.Entry<K, V> x = it.next();
+
+            // obtener su nuevo valor de dispersión para el nuevo arreglo...
+            K key = x.getKey();
+            int y = this.h(key, temp.length);
+
+            // insertarlo en el nuevo arreglo, en la lista numero "y"...
+            while (temp[y] != null)
+            {
+                y = this.h(y + 1, temp.length);
+            }
+            temp[y] = x;
+        }
+
+        // cambiar la referencia table para que apunte a temp...
+        this.table = temp;
     }
 
     /*
