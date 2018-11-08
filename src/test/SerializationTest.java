@@ -1,23 +1,22 @@
 package test;
 
+import datos.TSB_Hashtable;
 import datos.TSB_OAHashTableSerialization;
-import datos.TSB_OAHashtable;
 import entidades.Contador;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class SerializationTest {
-    private TSB_OAHashtable<String, Contador> list;
+    private TSB_Hashtable<String, Contador> list;
     private String pathTest = "lista.dat";
 
     @Before
@@ -28,7 +27,7 @@ public class SerializationTest {
             e.printStackTrace();
         }
 
-        list = new TSB_OAHashtable();
+        list = new TSB_Hashtable();
         list.put("Palabra1", new Contador());
         list.put("Palabra2", new Contador(3));
         list.put("Palabra3", new Contador(5));
@@ -38,14 +37,14 @@ public class SerializationTest {
 
     @Test(expected = FileNotFoundException.class)
     public void fileNotFoundReaderTest() throws IOException, ClassNotFoundException {
-        TSB_OAHashtable<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
+        Map<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
     }
 
     @Test
     public void writerAndReadTest() throws IOException, ClassNotFoundException {
         TSB_OAHashTableSerialization.write(list, pathTest);
 
-        TSB_OAHashtable<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
+        Map<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
 
         assertEquals(list, listRead);
     }
@@ -53,11 +52,11 @@ public class SerializationTest {
     @Test
     public void writerOverrideFileExistTest() throws IOException, ClassNotFoundException {
         TSB_OAHashTableSerialization.write(list, pathTest);
-        TSB_OAHashtable<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
+        Map<String, Contador> listRead = TSB_OAHashTableSerialization.read(pathTest);
 
         assertEquals(list, listRead);
 
-        TSB_OAHashTableSerialization.write(new TSB_OAHashtable<>(), pathTest);
+        TSB_OAHashTableSerialization.write(new TSB_Hashtable<>(), pathTest);
         listRead = TSB_OAHashTableSerialization.read(pathTest);
         assertNotEquals(list, listRead);
     }
