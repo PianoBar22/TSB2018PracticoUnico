@@ -181,7 +181,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
             }
             else
             {
-                if(this.averageLength() >= this.load_factor * 10) this.rehash();
+                if(this.averageLength() >= this.load_factor) this.rehash();
                 table[hash] = new Entry<>(key, value);
                 this.count++;
             }
@@ -189,18 +189,35 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
         return old;
     }
 
-    private int averageLength() {
-        return this.count / this.table.length;
+    private float averageLength() {
+        return (float)this.count / (float)this.table.length;
     }
 
     @Override
     public V remove(Object key) {
-        return null;
+        if(key == null) throw new NullPointerException("remove(): parámetro null");
+
+        int ik = this.search_by_key((K)key);
+        V old = null;
+
+        if(ik != -1)
+        {
+            old = this.table[ik].getValue();
+            this.table[ik] = tumba;
+
+            this.count--;
+            this.modCount++;
+        }
+
+        return old;
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-
+        for(Map.Entry<? extends K, ? extends V> e : m.entrySet())
+        {
+            put(e.getKey(), e.getValue());
+        }
     }
 
     @Override
@@ -218,12 +235,22 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
 
     @Override
     public Set<K> keySet() {
-        return null;
+        if(keySet == null)
+        {
+            // keySet = Collections.synchronizedSet(new KeySet());
+            keySet = new TSB_OAHashtable.KeySet();
+        }
+        return keySet;
     }
 
     @Override
     public Collection<V> values() {
-        return null;
+        if(values==null)
+        {
+            // values = Collections.synchronizedCollection(new ValueCollection());
+            values = new ValueCollection();
+        }
+        return values;
     }
 
     @Override
@@ -258,7 +285,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
 
         while (hash != initialHash
                 && ((table[hash]== tumba || table[hash] != null)
-                && table[hash].getKey() != key)) {
+                && !table[hash].getKey().equals(key))) {
 
             if (initialHash == -1)
                 initialHash = hash;
@@ -442,6 +469,34 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
             return TSB_OAHashtable.this.count;
         }
 
+        @Override
+        public void clear()
+        {
+            TSB_OAHashtable.this.clear();
+        }
+
+        @Override
+        public boolean contains(Object o)
+        {
+            if(o == null) { return false; }
+            if(!(o instanceof Entry)) { return false; }
+
+            Map.Entry<K, V> entry = (Map.Entry<K,V>)o;
+            K key = entry.getKey();
+            return TSB_OAHashtable.this.containsKey(key);
+        }
+
+        @Override
+        public boolean remove(Object o)
+        {
+            if(o == null) { throw new NullPointerException("remove(): parámetro null");}
+            if(!(o instanceof Entry)) { return false; }
+
+            Map.Entry<K, V> entry = (Map.Entry<K, V>) o;
+            K key = entry.getKey();
+            return TSB_OAHashtable.this.remove(key) != null;
+        }
+
         private class EntrySetIterator implements Iterator<Map.Entry<K, V>>
         {
             private int current_index;
@@ -499,6 +554,112 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
 
                 // y retornar el elemento alcanzado...
                 return t[current_index];
+            }
+        }
+    }
+
+    private class KeySet extends AbstractSet<K> {
+        @Override
+        public Iterator<K> iterator()
+        {
+            return new KeySetIterator();
+        }
+
+        @Override
+        public int size()
+        {
+            return TSB_OAHashtable.this.count;
+        }
+
+        @Override
+        public boolean contains(Object o)
+        {
+            return TSB_OAHashtable.this.containsKey(o);
+        }
+
+        @Override
+        public boolean remove(Object o)
+        {
+            return (TSB_OAHashtable.this.remove(o) != null);
+        }
+
+        @Override
+        public void clear()
+        {
+            TSB_OAHashtable.this.clear();
+        }
+
+        private class KeySetIterator implements Iterator<K>
+        {
+            private Iterator<Map.Entry<K, V>> entryIterator;
+
+            public KeySetIterator() {
+                entryIterator = TSB_OAHashtable.this.entrySet().iterator();
+            }
+
+            /**
+             * Indica si queda algun objeto en el recorrido del iterador.          *
+             * @return true si queda algun objeto en el recorrido - false si no
+             * quedan objetos.
+             */
+            @Override
+            public boolean hasNext() {
+                return this.entryIterator.hasNext();
+            }
+
+            @Override
+            public K next() {
+                return this.entryIterator.next().getKey();
+            }
+        }
+    }
+
+    private class ValueCollection extends AbstractCollection<V> {
+        @Override
+        public Iterator<V> iterator()
+        {
+            return new ValueCollectionIterator();
+        }
+
+        @Override
+        public int size()
+        {
+            return TSB_OAHashtable.this.count;
+        }
+
+        @Override
+        public boolean contains(Object o)
+        {
+            return TSB_OAHashtable.this.containsValue(o);
+        }
+
+        @Override
+        public void clear()
+        {
+            TSB_OAHashtable.this.clear();
+        }
+
+        private class ValueCollectionIterator implements Iterator<V>
+        {
+            private Iterator<Map.Entry<K, V>> iteratorEntry;
+
+            public ValueCollectionIterator() {
+                iteratorEntry = TSB_OAHashtable.this.entrySet().iterator();
+            }
+
+            /**
+             * Indica si queda algun objeto en el recorrido del iterador.          *
+             * @return true si queda algun objeto en el recorrido - false si no
+             * quedan objetos.
+             */
+            @Override
+            public boolean hasNext() {
+                return iteratorEntry.hasNext();
+            }
+
+            @Override
+            public V next() {
+                return iteratorEntry.next().getValue();
             }
         }
     }

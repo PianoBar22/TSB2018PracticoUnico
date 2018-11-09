@@ -16,7 +16,7 @@ public class ManejadorArchivoTest {
     @Before
     public void setUp()
     {
-        String path = "16082-8.txt";
+        String path = "FileTest.txt";
         file = new File(path);
 
         manejadorArchivos = new ManejadorArchivos();

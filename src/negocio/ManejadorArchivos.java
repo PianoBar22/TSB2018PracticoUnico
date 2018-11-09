@@ -8,9 +8,11 @@ import entidades.Contador;
 import entidades.Palabra;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -26,16 +28,12 @@ public class ManejadorArchivos {
     public ManejadorArchivos() {
         listPalabras = new TSB_OAHashtable<>();
         listArchivos = new TSBArrayList<>();
-
-        this.obtenerPalabrasGuardadas();
     }
 
     public ManejadorArchivos(String path) {
         listPalabras = new TSB_OAHashtable<>();
         listArchivos = new TSBArrayList<>();
         this.pathListaPalabras = path;
-
-        this.obtenerPalabrasGuardadas();
     }
 
     public void cargarArchivo(File file) throws IOException {
@@ -45,18 +43,20 @@ public class ManejadorArchivos {
 
             InputStream inputStream = new FileInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
+            //BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);
+                    String line;
 
             while ((line = reader.readLine()) != null) {
-                String regex = "([a-zA-Z]|'|´)+";
-                //String regex = "(\\p{Ll}|')+";
+                //String regex = "([a-zA-Z]|'|í)+";
+                String regex = "(\\p{L}|'|ñ|Ñ|á|é|í|ó|ú|Á|É|Í|Ó|Ú)+";
 
                 Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
                 Matcher matcher = pattern.matcher(line);
 
                 while (matcher.find())
                 {
-                    Contador p = listPalabras.get(matcher.group().toUpperCase());
+                    String descripcion = matcher.group().toUpperCase();
+                    Contador p = listPalabras.get(descripcion);
 
                     if (p != null)
                     {
@@ -64,12 +64,10 @@ public class ManejadorArchivos {
                     }
                     else
                     {
-                        listPalabras.put(matcher.group().toUpperCase(), new Contador());
+                        listPalabras.put(descripcion, new Contador());
                     }
                 }
             }
-
-            this.guardarPalabrasEnDisco();
         }
     }
 
@@ -82,15 +80,19 @@ public class ManejadorArchivos {
         return listPalabras.get(text.toUpperCase());
     }
 
-    public Map<String, Contador> getListPalabras() {
-        return listPalabras;
+    public int sizePalabras(){
+        return this.listPalabras.size();
     }
 
-    private void guardarPalabrasEnDisco() throws IOException {
+    public Iterator<Map.Entry<String, Contador>> iterator(){
+        return this.listPalabras.entrySet().iterator();
+    }
+
+    public void guardarPalabrasEnDisco() throws IOException {
         TSB_OAHashTableSerialization.write(this.listPalabras, pathListaPalabras);
     }
 
-    private void obtenerPalabrasGuardadas() {
+    public void obtenerPalabrasGuardadas() {
         if (Files.exists(Paths.get(pathListaPalabras))){
             Map<String, Contador> listDisco = null;
             try {

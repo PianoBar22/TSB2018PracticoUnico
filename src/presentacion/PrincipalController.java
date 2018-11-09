@@ -41,6 +41,7 @@ public class PrincipalController implements Initializable {
 
             try {
                 manejadorArchivo.cargarArchivo(file);
+                manejadorArchivo.guardarPalabrasEnDisco();
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -80,14 +81,15 @@ public class PrincipalController implements Initializable {
 
     public PrincipalController() {
         manejadorArchivo = new ManejadorArchivos();
+        manejadorArchivo.obtenerPalabrasGuardadas();
     }
 
     private void mostrarPalabras(){
         lvPalabras.getItems().clear();
 
-        lblArchivo.setText("Cantidad de palabras: " + manejadorArchivo.getListPalabras().size());
-        if (manejadorArchivo.getListPalabras().size() > 0){
-            Iterator<Map.Entry<String, Contador>> i = manejadorArchivo.getListPalabras().entrySet().iterator();
+        lblArchivo.setText("Cantidad de palabras: " + manejadorArchivo.sizePalabras());
+        if (manejadorArchivo.sizePalabras() > 0){
+            Iterator<Map.Entry<String, Contador>> i = manejadorArchivo.iterator();
             ObservableList data = FXCollections.observableArrayList();
 
             while(i.hasNext())
