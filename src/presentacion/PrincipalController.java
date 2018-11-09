@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class PrincipalController implements Initializable {
@@ -61,7 +62,11 @@ public class PrincipalController implements Initializable {
             Contador c = manejadorArchivo.buscarPalabra(txtBusqueda.getText());
 
             if (c != null) {
-                lblResultado.setText("Palabra encontrada; " + c.toString());
+                int index = lvPalabras.getItems().indexOf("Palabra: " + txtBusqueda.getText().toUpperCase() + "; Frecuencia: " + c.getFrecuencia());
+                lvPalabras.scrollTo(index);
+                lvPalabras.getSelectionModel().select(index);
+
+                lblResultado.setText("Palabra encontrada");
             } else {
                 lblResultado.setText("Palabra NO encontrada");
             }
@@ -71,8 +76,15 @@ public class PrincipalController implements Initializable {
 
     public void limpiar (ActionEvent actionEvent){
         try {
-            this.manejadorArchivo.borrarDatos();
-            mostrarPalabras();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Limpiar Listado");
+            alert.setContentText("¿Esta seguro que desea eliminar todas las palabras del listado?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK){
+                this.manejadorArchivo.borrarDatos();
+                mostrarPalabras();
+            }
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Hubo un error: " + e.getMessage());
             alert.showAndWait();
@@ -87,7 +99,7 @@ public class PrincipalController implements Initializable {
     private void mostrarPalabras(){
         lvPalabras.getItems().clear();
 
-        lblArchivo.setText("Cantidad de palabras: " + manejadorArchivo.sizePalabras());
+        lblArchivo.setText("Cantidad de palabras distintas: " + manejadorArchivo.sizePalabras());
         if (manejadorArchivo.sizePalabras() > 0){
             Iterator<Map.Entry<String, Contador>> i = manejadorArchivo.iterator();
             ObservableList data = FXCollections.observableArrayList();
@@ -98,7 +110,7 @@ public class PrincipalController implements Initializable {
                 String key = e.getKey();
                 int value = ((Contador)e.getValue()).getFrecuencia();
 
-                String result = "palabra: " + key + "; frecuencia: " + value;
+                String result = "Palabra: " + key + "; Frecuencia: " + value;
                 data.add(result);
             }
             lvPalabras.setItems(data);
@@ -109,5 +121,43 @@ public class PrincipalController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         mostrarPalabras();
+    }
+
+    public void eliminar(ActionEvent actionEvent) {
+        if (txtBusqueda.getText().isEmpty()) {
+            lblResultado.setText("No se ingreso ninguna palabra");
+        } else {
+            Contador c = manejadorArchivo.buscarPalabra(txtBusqueda.getText());
+
+            if (c != null) {
+                int index = lvPalabras.getItems().indexOf("Palabra: " + txtBusqueda.getText().toUpperCase() + "; Frecuencia: " + c.getFrecuencia());
+                lvPalabras.scrollTo(index);
+                lvPalabras.getSelectionModel().select(index);
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Eliminar Palabra");
+                alert.setContentText("¿Esta seguro que desea eliminar la palabra " + txtBusqueda.getText() + " del listado?");
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get() == ButtonType.OK){
+                    if (this.manejadorArchivo.eliminarPalabra(txtBusqueda.getText()))
+                    {
+                        lblResultado.setText("Palabra eliminada del listado");
+                        mostrarPalabras();
+                        txtBusqueda.setText("");
+                        try {
+                            manejadorArchivo.actualizarListado();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else
+                        lblResultado.setText("La palabra no se pudo eliminar del listado");
+                }
+            } else {
+                lblResultado.setText("Palabra NO encontrada");
+            }
+
+        }
     }
 }

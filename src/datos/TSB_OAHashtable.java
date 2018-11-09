@@ -284,8 +284,8 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable {
         int initialHash = -1;
 
         while (hash != initialHash
-                && ((table[hash]== tumba || table[hash] != null)
-                && !table[hash].getKey().equals(key))) {
+                && (table[hash]== tumba
+                    ||(table[hash] != null && !table[hash].getKey().equals(key)))) {
 
             if (initialHash == -1)
                 initialHash = hash;

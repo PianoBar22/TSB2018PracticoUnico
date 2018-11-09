@@ -9,17 +9,18 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.181" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentacion.PrincipalController">
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentacion.PrincipalController">
     <children>
       <AnchorPane prefHeight="600" prefWidth="800">
          <children>
-              <Button fx:id="btnBuscar" layoutX="14.0" layoutY="154.0" onAction="#buscar" text="Buscar" />
-              <Label fx:id="lblArchivo" layoutX="14.0" layoutY="66.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="375.0" text="Archivo:" />
-              <Button fx:id="btnLimpiar" layoutX="100.0" layoutY="34.0" onAction="#limpiar" text="Limpiar" />
-              <TextField fx:id="txtBusqueda" layoutX="14.0" layoutY="118.0" />
-              <Label fx:id="lblResultado" layoutX="14.0" layoutY="101.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="277.0" text="(Ingrese palabra a buscar)" />
-              <Button fx:id="btnCargar" layoutX="14.0" layoutY="34.0" onAction="#cargar" text="Cargar..." />
-            <ListView fx:id="lvPalabras" layoutX="334.0" layoutY="34.0" prefHeight="460.0" prefWidth="360.0" />
+              <Button fx:id="btnBuscar" layoutX="362.0" layoutY="136.0" onAction="#buscar" text="Buscar" />
+              <Label fx:id="lblArchivo" layoutX="33.0" layoutY="542.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="375.0" text="Cantidad palabras" />
+              <Button fx:id="btnLimpiar" layoutX="238.0" layoutY="34.0" onAction="#limpiar" text="Limpiar Listado" />
+              <TextField fx:id="txtBusqueda" layoutX="362.0" layoutY="100.0" prefHeight="25.0" prefWidth="199.0" />
+              <Label fx:id="lblResultado" layoutX="362.0" layoutY="72.0" minHeight="16" minWidth="69" prefHeight="17.0" prefWidth="277.0" text="(Ingrese palabra a buscar)" />
+              <Button fx:id="btnCargar" layoutX="33.0" layoutY="34.0" onAction="#cargar" text="Cargar Nuevo Archivo..." />
+            <ListView fx:id="lvPalabras" layoutX="33.0" layoutY="72.0" prefHeight="460.0" prefWidth="302.0" />
+            <Button fx:id="btnEliminar" layoutX="460.0" layoutY="136.0" onAction="#eliminar" text="Eliminar Palabra" />
          </children>
       </AnchorPane>
     </children>

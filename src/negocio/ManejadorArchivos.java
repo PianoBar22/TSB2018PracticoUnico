@@ -48,7 +48,7 @@ public class ManejadorArchivos {
 
             while ((line = reader.readLine()) != null) {
                 //String regex = "([a-zA-Z]|'|í)+";
-                String regex = "(\\p{L}|'|ñ|Ñ|á|é|í|ó|ú|Á|É|Í|Ó|Ú)+";
+                String regex = "\\b([a-zA-Z]|'|ñ|Ñ|á|é|í|ó|ú|Á|É|Í|Ó|Ú)*\\b";
 
                 Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
                 Matcher matcher = pattern.matcher(line);
@@ -58,17 +58,25 @@ public class ManejadorArchivos {
                     String descripcion = matcher.group().toUpperCase();
                     Contador p = listPalabras.get(descripcion);
 
+                    if(descripcion.equals("D"))
+                    {
+                        int i = 0;
+                    }
                     if (p != null)
                     {
                         p.incrementar();
                     }
-                    else
+                    else if(descripcion.trim().length() > 0)
                     {
                         listPalabras.put(descripcion, new Contador());
                     }
                 }
             }
         }
+    }
+
+    public boolean eliminarPalabra(String palabra){
+        return this.listPalabras.remove(palabra.toUpperCase()) != null;
     }
 
     @Override
@@ -106,6 +114,10 @@ public class ManejadorArchivos {
         }
     }
 
+    public void actualizarListado() throws IOException {
+        Files.deleteIfExists(Paths.get(this.pathListaPalabras));
+        guardarPalabrasEnDisco();
+    }
     public void borrarDatos() throws IOException {
         Files.deleteIfExists(Paths.get(this.pathListaPalabras));
         this.listPalabras = new TSB_OAHashtable<>();
